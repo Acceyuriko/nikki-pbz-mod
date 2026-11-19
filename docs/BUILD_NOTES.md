@@ -45,3 +45,15 @@
 - mod.json 的 physics 段按本模型骨骼名配 groups：skirt=`^c_skirt_0[1-6]_0[1-3]_[lr]$`、underskirt=`^NP_Cloth_Part03_`、ribbon=`^NP_Cloth_Part04_`（长飘带）、hair=`(?i)hair`。碰撞体 leg/spine/head，collide_pairs=[[skirt,leg],[ribbon,leg]]。
 - 出包：`pwsh tools\build-mod.ps1 -Mod nikki`（**不带** -NoPhys）→ 变体 default-phys，生成 PA_Nikki_Secondary，verify 会检查到它。ucas 约 20.4MB。
 - Blender 预览看不出物理，必须在游戏里走动/攻击验证。物理参数照 ciel/wendy 的 mod.json 比例配，抖得厉害就调 stiff/swing，穿模就加 collide_pairs。
+
+## 第二套：熠熠舞曲（2026-11-19）
+
+- 素材来源：B站 Airsoya 的 Blender 工程 `Nikki熠熠舞曲_5.0_B2.blend`。自带完整骨架 299 根骨头（Spine1_M / Shoulder_L / Hip_L / NP_Cloth_Part01_* / NP_Hair_Part01_* 这种命名），贴图全部打包在 blend 里。
+- 导出脚本 `wuyu/export_wuyu.py`，和第一套 `export_fbx_real.py` 的思路一样，但有两处不同：
+  1. 按材质拆网格（`bpy.ops.mesh.separate(type='MATERIAL')`）再分组，因为这套模型一个网格里混了身体/脸/眼睛/裙子多种材质，不能按网格分槽。
+  2. 槽位按材质名判断：含 Face/Eye/Cornea/Eyelash/Eyebrow/Brow → Face；`MI_S0142H_01` 或 hair → Hair；含 Body → Skin；其余 `MI_S0142*` 和羽毛/宝石 → Cloth。
+- 骨架在 blend 里是隐藏的（`hide_get()==True`），FBX 导出会跳过隐藏的骨架。导出前必须 `arm.hide_set(False)`，否则导出的 FBX 只有网格没有骨架。
+- 这套不用 `adapt_humanoid`，走纯 IK 重定向，和第一套一样。`retarget.chains` 填新骨骼名：Spine=[Spine1_M,Chest_Mid_M]、LeftArm=[Shoulder_L,Wrist_L]、LeftLeg=[Hip_L,Ankle_L]、LeftClavicle=[Scapula_L,Scapula_L]，手指用 `XxxFinger1_L..3_L` 三段链。`root_bone` 用 `Root`。
+- 物理：裙子骨头 `^NP_Cloth_Part01_`（34 个刚体）、头发 `(?i)hair`（16 个刚体）。**collide_pairs 留空**——长拖尾加碰撞会炸，用户要求让它穿模。kinematic_colliders 也留空。
+- 出包：`pwsh tools\build-mod.ps1 -Mod nikki-wuyu` → `release/default-phys`，`zzz_NikkiWuyu_P.ucas` 约 32.5MB（2048 图集比第一套大）。verify 全绿。
+- 隐患：宝石/羽毛是透明和自发光的材质，烘 DIFFUSE 颜色时变成黑色块，游戏里这部分会偏暗或发黑。
