@@ -2,6 +2,7 @@
 
 把《影之刃零》（Phantom Blade Zero）主角「魂」的模型换成「暖暖 Nikki」。
 
+- 📥 下载 / Download：[Nexus Mods 页面](https://www.nexusmods.com/phantombladezero/mods/1362)
 - 游戏：Phantom Blade Zero（UE 5.7，Steam build 26367565）
 - 替换对象：主角魂
 - 版本：default-phys（带次级物理）
