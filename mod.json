@@ -1,0 +1,113 @@
+{
+  "mod_name": "Nikki",
+  "container": "zzz_Nikki_P",
+  "soul": {
+    "arm_scale": { "clavicle": 1.0, "upperarm": 1.0, "lowerarm": 1.0 }
+  },
+  "model": {
+    "fbx_dir": "input/fbx",
+    "main_fbx": "Nikki.fbx",
+    "extra_fbx": [],
+    "optional_fbx": {},
+    "blender_to_cm": 100.0,
+    "scale": 1.0,
+    "root_bone": "root_x",
+    "attach": {},
+    "skip_bones": [],
+    "align_accessories": [],
+    "delete_meshes": [],
+    "shape_keys": {},
+    "keep_shape_keys": {},
+    "material_slots": {
+      "Face": "Face",
+      "Skin": "Skin",
+      "Hair": "Hair",
+      "Cloth": "Costume"
+    },
+    "drop_materials": [],
+    "sole_bones": ["foot_l", "foot_r", "toes_01_l", "toes_01_r"],
+    "left_foot": "foot_l",
+    "left_toe": "toes_01_l",
+    "rest_rotations": []
+  },
+  "retarget": {
+    "chains": {
+      "Spine": ["spine_02_x", "spine_05_x"],
+      "Neck": ["neck_x", "neck_x"],
+      "Head": ["head_x", "head_x"],
+      "LeftClavicle": ["shoulder_l", "shoulder_l"],
+      "RightClavicle": ["shoulder_r", "shoulder_r"],
+      "LeftArm": ["arm_l", "hand_l"],
+      "RightArm": ["arm_r", "hand_r"],
+      "LeftLeg": ["thigh_l", "foot_l"],
+      "RightLeg": ["thigh_r", "foot_r"],
+      "LeftToe": ["toes_01_l", "toes_01_l"],
+      "RightToe": ["toes_01_r", "toes_01_r"],
+      "LeftThumb": ["thumb1_l", "thumb1_l"],
+      "LeftIndex": ["index1_l", "index1_l"],
+      "LeftMiddle": ["middle1_l", "middle1_l"],
+      "LeftRing": ["ring1_l", "ring1_l"],
+      "LeftPinky": ["pinky1_l", "pinky1_l"],
+      "RightThumb": ["thumb1_r", "thumb1_r"],
+      "RightIndex": ["index1_r", "index1_r"],
+      "RightMiddle": ["middle1_r", "middle1_r"],
+      "RightRing": ["ring1_r", "ring1_r"],
+      "RightPinky": ["pinky1_r", "pinky1_r"]
+    },
+    "hand_ik": true,
+    "arm_pole_deg": 10.0,
+    "finger_alpha": 0.85,
+    "skip_auto_align": false
+  },
+  "physics": {
+    "world_alpha": 0.5,
+    "min_bone_size": 0.6,
+    "skip_match": "^$",
+    "groups": [
+      { "name": "skirt", "match": "^c_skirt_0[1-6]_0[1-3]_[lr]$", "gravity": true, "lin": 2.5, "ang": 10.0, "swing": 18, "twist": 8, "stiff": 40, "damp": 40 },
+      { "name": "underskirt", "match": "^NP_Cloth_Part03_", "gravity": true, "lin": 2.5, "ang": 10.0, "swing": 14, "twist": 6, "stiff": 50, "damp": 40 },
+      { "name": "ribbon", "match": "^NP_Cloth_Part04_", "gravity": true, "lin": 2.0, "ang": 6.0, "swing": 20, "twist": 8, "stiff": 60, "damp": 30 },
+      { "name": "hair", "match": "(?i)hair", "gravity": true, "lin": 1.4, "ang": 4.5, "swing": 12, "twist": 5, "stiff": 260, "damp": 26 }
+    ],
+    "kinematic_colliders": {
+      "spine": ["spine_02_x", "spine_03_x", "spine_04_x", "spine_05_x"],
+      "head": ["head_x"]
+    },
+    "collide_pairs": [
+      ["hair", "spine"]
+    ]
+  },
+  "materials": {
+    "Face": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Material/MI_ZeroHun_Cap_01_b",
+    "Skin": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Material/MI_ZeroHun_Cloth_02_b",
+    "Hair": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Material/MI_ZeroHun_Cloth_01_b",
+    "Costume": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Material/MI_ZeroHun_Cloth_03_b"
+  },
+  "generated_textures": [
+    { "out": "work/textures/T_Skin_ARM.png", "type": "arm", "rough": 0.65, "metal": 0.0 },
+    { "out": "work/textures/T_Hair_ARM.png", "type": "arm", "rough": 0.55, "metal": 0.0 },
+    { "out": "work/textures/T_Costume_ARM.png", "type": "arm", "rough": 0.75, "metal": 0.0 },
+    { "out": "work/textures/T_Flat_N.png", "type": "flat_normal" }
+  ],
+  "textures": [
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cap_V02_BC", "slot": "Face", "source": "input/textures/Face.png", "kind": "BC", "lod_group": "TEXTUREGROUP_Project02" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cap_V02_N", "slot": "Face", "source": "work/textures/T_Flat_N.png", "kind": "N", "lod_group": "TEXTUREGROUP_Project02" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cap_V02_ARM", "slot": "Face", "source": "work/textures/T_Skin_ARM.png", "kind": "ARM", "lod_group": "TEXTUREGROUP_CharacterSpecular" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cloth_02_BC", "slot": "Skin", "source": "input/textures/Skin.png", "kind": "BC", "lod_group": "TEXTUREGROUP_Project02" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cloth_02_N", "slot": "Skin", "source": "work/textures/T_Flat_N.png", "kind": "N", "lod_group": "TEXTUREGROUP_Project02" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cloth_02_ARM", "slot": "Skin", "source": "work/textures/T_Skin_ARM.png", "kind": "ARM", "lod_group": "TEXTUREGROUP_CharacterSpecular" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cloth_01_BC", "slot": "Hair", "source": "input/textures/Hair.png", "kind": "BC", "lod_group": "TEXTUREGROUP_Project02" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cloth_01_N", "slot": "Hair", "source": "work/textures/T_Flat_N.png", "kind": "N", "lod_group": "TEXTUREGROUP_Project02" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cloth_01_ARM", "slot": "Hair", "source": "work/textures/T_Hair_ARM.png", "kind": "ARM", "lod_group": "TEXTUREGROUP_CharacterSpecular" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cloth_03_BC", "slot": "Costume", "source": "input/textures/Cloth.png", "kind": "BC", "lod_group": "TEXTUREGROUP_Project02" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cloth_03_N", "slot": "Costume", "source": "work/textures/T_Flat_N.png", "kind": "N", "lod_group": "TEXTUREGROUP_Project02" },
+    { "target": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Textures/T_ZeroHun_Cloth_03_ARM", "slot": "Costume", "source": "work/textures/T_Costume_ARM.png", "kind": "ARM", "lod_group": "TEXTUREGROUP_CharacterSpecular" }
+  ],
+  "variants": {
+    "default": { "include": [] }
+  },
+  "preview": {
+    "closeups": []
+  },
+  "preview_anims": []
+}
