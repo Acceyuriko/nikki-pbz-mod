@@ -60,15 +60,17 @@
     "skip_auto_align": false
   },
   "physics": {
-    "world_alpha": 0.5,
+    "world_alpha": 0.4,
     "min_bone_size": 0.6,
     "skip_match": "^$",
     "groups": [
-      { "name": "skirt", "match": "^NP_Cloth_Part01_", "gravity": true, "lin": 2.5, "ang": 8.0, "swing": 14, "twist": 6, "stiff": 45, "damp": 40 },
+      { "name": "skirt", "match": "^NP_Cloth_Part01_", "gravity": true, "lin": 2.0, "ang": 6.0, "swing": 10, "twist": 5, "stiff": 28, "damp": 70 },
       { "name": "hair", "match": "(?i)hair", "gravity": true, "lin": 1.4, "ang": 4.5, "swing": 12, "twist": 5, "stiff": 260, "damp": 26 }
     ],
-    "kinematic_colliders": {},
-    "collide_pairs": []
+    "kinematic_colliders": {
+      "leg": ["Hip_L", "Knee_L", "Ankle_L", "Toes_L", "Hip_R", "Knee_R", "Ankle_R", "Toes_R"]
+    },
+    "collide_pairs": [["skirt", "leg"]]
   },
   "materials": {
     "Face": "/Game/PBZContent/Characters/Hero/Hun_New_V2b/Material/MI_ZeroHun_Cap_01_b",

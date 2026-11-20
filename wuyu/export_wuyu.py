@@ -2,6 +2,7 @@
 # 把 熠熠舞曲 blend 导出为「干净骨架 + 蒙皮」的 FBX，并把所有材质烘成 4 张图集贴图。
 # 用法: blender -b <blend> -P export_wuyu.py -- <out_fbx> <out_texdir> [res]
 import bpy, os, sys, math, json
+import numpy as np
 
 argv = sys.argv[sys.argv.index('--') + 1:]
 BLEND, OUT_FBX, OUT_TEX = argv[0], argv[1], argv[2]
@@ -9,6 +10,55 @@ RES = int(argv[3]) if len(argv) > 3 else 2048
 os.makedirs(os.path.dirname(OUT_FBX), exist_ok=True)
 os.makedirs(OUT_TEX, exist_ok=True)
 def log(*a): print('WUYU', *a, flush=True)
+
+def alpha_source(mat):
+    """返回材质的透明度来源：('link', from_socket) 或 ('const', 值)。
+    优先取 BSDF Alpha 有连线的；否则取非 1 的常量；默认完全不透明 1。"""
+    bsdfs = [n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED']
+    for b in bsdfs:
+        a = b.inputs.get('Alpha')
+        if a and a.is_linked:
+            return ('link', a.links[0].from_socket)
+    for b in bsdfs:
+        a = b.inputs.get('Alpha')
+        if a and not a.is_linked and abs(float(a.default_value) - 1.0) > 1e-4:
+            return ('const', float(a.default_value))
+    return ('const', 1.0)
+
+def bake_alpha_into(color_img, slot_objs, slot):
+    """把每个材质的不透明度烘成灰度图，再写进 color_img 的 alpha 通道。"""
+    aimg = bpy.data.images.new('ALPHA_' + slot, RES, RES, alpha=True)
+    aimg.colorspace_settings.name = 'Non-Color'
+    for o in slot_objs:
+        for ms in o.material_slots:
+            mat = ms.material
+            if not mat or not mat.use_nodes:
+                continue
+            nt = mat.node_tree
+            outs = [n for n in nt.nodes if n.type == 'OUTPUT_MATERIAL']
+            if not outs:
+                continue
+            kind, val = alpha_source(mat)
+            em = nt.nodes.new('ShaderNodeEmission')
+            em.inputs['Strength'].default_value = 1.0
+            if kind == 'link':
+                nt.links.new(val, em.inputs['Color'])
+            else:
+                v = float(val); em.inputs['Color'].default_value = (v, v, v, 1.0)
+            nt.links.new(em.outputs['Emission'], outs[0].inputs['Surface'])
+            add_bake_target(mat, aimg)
+    bpy.context.view_layer.objects.active = slot_objs[0]
+    with bpy.context.temp_override(active_object=slot_objs[0], object=slot_objs[0],
+                                   selected_objects=slot_objs, selected_editable_objects=slot_objs):
+        bpy.ops.object.bake(type='EMIT', margin=4, use_clear=True)
+    ca = np.empty(RES * RES * 4, np.float32); color_img.pixels.foreach_get(ca)
+    aa = np.empty(RES * RES * 4, np.float32); aimg.pixels.foreach_get(aa)
+    ca = ca.reshape(-1, 4); aa = aa.reshape(-1, 4)
+    ca[:, 3] = aa[:, 0]
+    color_img.pixels.foreach_set(np.ascontiguousarray(ca.ravel(), np.float32))
+    color_img.update()
+    try: bpy.data.images.remove(aimg)
+    except Exception: pass
 
 bpy.ops.wm.open_mainfile(filepath=BLEND)
 arm = next(o for o in bpy.data.objects if o.type == 'ARMATURE')
@@ -157,6 +207,7 @@ for slot, olist in slot_objs.items():
     with bpy.context.temp_override(active_object=olist[0], object=olist[0],
                                    selected_objects=olist, selected_editable_objects=olist):
         bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, margin=4, use_clear=True)
+    bake_alpha_into(img, olist, slot)
     p = os.path.join(OUT_TEX, slot + '.png')
     img.filepath_raw = p; img.file_format = 'PNG'; img.save()
     log('baked', slot, '->', p)

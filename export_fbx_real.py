@@ -2,6 +2,7 @@
 # Bakes each garment/body part's diffuse color into one atlas per slot (Skin/Face/Hair/Cloth).
 # Run: blender -b Nikki_2.0.blend -P export_fbx_real.py -- <out_fbx> <out_texdir> [resolution]
 import bpy, os, sys, json, math
+import numpy as np
 from mathutils import Vector
 
 argv = sys.argv[sys.argv.index('--') + 1:]
@@ -197,6 +198,54 @@ def add_bake_target(mat, img):
     nt.nodes.active = tn
     return tn
 
+def alpha_source(mat):
+    """返回材质透明度来源：('link', from_socket) 或 ('const', 值)。"""
+    bsdfs = [n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED']
+    for b in bsdfs:
+        a = b.inputs.get('Alpha')
+        if a and a.is_linked:
+            return ('link', a.links[0].from_socket)
+    for b in bsdfs:
+        a = b.inputs.get('Alpha')
+        if a and not a.is_linked and abs(float(a.default_value) - 1.0) > 1e-4:
+            return ('const', float(a.default_value))
+    return ('const', 1.0)
+
+def bake_alpha_into(color_img, slot_objs, slot):
+    """把每个材质的不透明度烘成灰度图，写进 color_img 的 alpha 通道。"""
+    aimg = bpy.data.images.new('ALPHA_' + slot, RES, RES, alpha=True)
+    aimg.colorspace_settings.name = 'Non-Color'
+    for o in slot_objs:
+        for ms in o.material_slots:
+            mat = ms.material
+            if not mat or not mat.use_nodes:
+                continue
+            nt = mat.node_tree
+            outs = [n for n in nt.nodes if n.type == 'OUTPUT_MATERIAL']
+            if not outs:
+                continue
+            kind, val = alpha_source(mat)
+            em = nt.nodes.new('ShaderNodeEmission')
+            em.inputs['Strength'].default_value = 1.0
+            if kind == 'link':
+                nt.links.new(val, em.inputs['Color'])
+            else:
+                v = float(val); em.inputs['Color'].default_value = (v, v, v, 1.0)
+            nt.links.new(em.outputs['Emission'], outs[0].inputs['Surface'])
+            add_bake_target(mat, aimg)
+    bpy.context.view_layer.objects.active = slot_objs[0]
+    with bpy.context.temp_override(active_object=slot_objs[0], object=slot_objs[0],
+                                   selected_objects=slot_objs, selected_editable_objects=slot_objs):
+        bpy.ops.object.bake(type='EMIT', margin=4, use_clear=True)
+    ca = np.empty(RES * RES * 4, np.float32); color_img.pixels.foreach_get(ca)
+    aa = np.empty(RES * RES * 4, np.float32); aimg.pixels.foreach_get(aa)
+    ca = ca.reshape(-1, 4); aa = aa.reshape(-1, 4)
+    ca[:, 3] = aa[:, 0]
+    color_img.pixels.foreach_set(np.ascontiguousarray(ca.ravel(), np.float32))
+    color_img.update()
+    try: bpy.data.images.remove(aimg)
+    except Exception: pass
+
 slot_meshes = {s: [] for s in SLOTS}
 for m in meshes:
     slot_meshes[CHARMESH.get(m.name, 'Cloth')].append(m)
@@ -293,6 +342,7 @@ for slot, objs in slot_meshes.items():
     with bpy.context.temp_override(active_object=objs[0], object=objs[0],
                                    selected_objects=objs, selected_editable_objects=objs):
         bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, margin=4, use_clear=True)
+    bake_alpha_into(img, objs, slot)
     p = os.path.join(OUT_TEX, slot + '.png')
     img.filepath_raw = p; img.file_format = 'PNG'; img.save()
     atlas_paths[slot] = p
