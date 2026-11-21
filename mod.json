@@ -10,7 +10,7 @@
     "extra_fbx": [],
     "optional_fbx": {},
     "blender_to_cm": 100.0,
-    "scale": 1.0,
+    "scale": 1.07,
     "root_bone": "root_x",
     "attach": {},
     "skip_bones": [],
